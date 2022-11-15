@@ -468,7 +468,7 @@ audio	AUDIO	(
 	.audio_r     ( AUDIO_R    )
 );
 
-mist_video #(.COLOR_DEPTH(1), .SD_HCNT_WIDTH(10), .SYNC_AND(1)) mist_video (
+mist_video #(.COLOR_DEPTH(1), .SD_HCNT_WIDTH(11), .SYNC_AND(1)) mist_video (
 	.clk_sys     ( clk_48m    ),
 
 	// OSD SPI interface
@@ -480,7 +480,7 @@ mist_video #(.COLOR_DEPTH(1), .SD_HCNT_WIDTH(10), .SYNC_AND(1)) mist_video (
 	.scanlines   ( scanlines  ),
 
 	// non-scandoubled pixel clock divider 0 - clk_sys/4, 1 - clk_sys/2
-	.ce_divider  ( 1'b0       ),
+	.ce_divider  ( 3'd1       ),
 
 	// 0 = HVSync 31KHz, 1 = CSync 15KHz
 	.scandoubler_disable ( scandoubler_disable ),

@@ -677,7 +677,7 @@ end
 assign SHADOW_RAM = (cpu_a[15:12] == 4'h3 || cpu_a[15:14] == 2'b01) && (acc_x | (acc_e & vdu_op & ~cpu_sync));
 
 // FDC (Master)
-fdc1772 #(.IMG_TYPE(2), .INVERT_HEAD_RA(1'b1), .EXT_MOTOR(1'b1), .CLK_EN(16'd4000)) FDC1772 (
+fdc1772 #(.INVERT_HEAD_RA(1'b1), .MODEL(0), .CLK_EN(16'd4000)) FDC1772 (
 
 	.clkcpu         ( CLK48M_I         ),
 	.clk8m_en       ( mhz4_clken       ),
@@ -691,6 +691,7 @@ fdc1772 #(.IMG_TYPE(2), .INVERT_HEAD_RA(1'b1), .EXT_MOTOR(1'b1), .CLK_EN(16'd400
 	.irq            ( fdc_irq          ),
 	.drq            ( fdc_drq          ),
 
+	.img_type       ( 3'd2             ),
 	.img_mounted    ( img_mounted      ),
 	.img_size       ( img_size         ),
 	.img_wp         ( 0                ),
@@ -705,7 +706,7 @@ fdc1772 #(.IMG_TYPE(2), .INVERT_HEAD_RA(1'b1), .EXT_MOTOR(1'b1), .CLK_EN(16'd400
 	.sd_dout_strobe ( sd_dout_strobe   ),
 
 	.floppy_drive   ( floppy_drive     ),
-	.floppy_motor   ( !floppy_motor    ),
+//	.floppy_motor   ( !floppy_motor    ),
 //.floppy_inuse<->( floppy_inuse     ),
 	.floppy_side    ( floppy_side      ),
 //.floppy_density ( floppy_density   ),
@@ -719,7 +720,7 @@ always @(posedge CLK48M_I) begin
 		floppy_drive <= 4'b1111;
 		{ floppy_side, floppy_reset, floppy_density } <= 0;
 	end else if (cpu_clken) begin
-    // Access Control Register 0xFE34
+		// FE24 Drive control register
 		if (fdcon_enable & ~cpu_r_nw) begin
 			floppy_drive <= { 3'b111, ~cpu_do[0] };
 			floppy_reset <= cpu_do[2];
