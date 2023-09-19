@@ -60,7 +60,9 @@ module vidproc (
            input   		B_IN,
            output reg 		R,
            output reg 		G,
-           output reg 		B
+           output reg 		B,
+					 input          DE, // direct signal from CRTC to create BLANK
+					 output reg     BLANK
        );
 
 //  Clock enable qualifies display cycles (interleaved with CPU cycles)
@@ -77,7 +79,7 @@ reg     [3:0] palette [0:15];
 reg     [7:0] shiftreg;
 
 //  Delayed display enable
-reg     delayed_disen1, delayed_disen2;
+reg     delayed_disen;
 
 //  Internal clock enable generation
 wire    clken_pixel;
@@ -89,9 +91,19 @@ reg     [3:0] clken_counter;
 //  Segments 0 and 1 are 8 pixels wide
 //  Segment 2 is 16 pixels wide
 wire    cursor_invert;
+reg     cursor_invert_d1;
+reg     cursor_invert_d2;
+reg     cursor_invert_d3;
+reg     cursor_invert_d4;
 reg     cursor_invert_delayed;
 reg     cursor_active;
 reg     [1:0] cursor_counter;
+
+reg     teletext_delayed_disen;
+reg     teletext_delayed_disen_d1;
+reg     teletext_delayed_disen_d2;
+reg     teletext_delayed_disen_d3;
+reg     teletext_delayed_disen_d4;
 
 //  Synchronous register access, enabled on every clock
 integer  V2V_colour;
@@ -244,11 +256,29 @@ wire 	green_val = dot_val[3] & r0_flash ^ ~dot_val[1];
 wire 	blue_val  = dot_val[3] & r0_flash ^ ~dot_val[2];
 
 //  Display enable signal delayed by one clock
-reg delayed_disen;
 always @(posedge CLOCK) if (mhz4_clken) delayed_disen <= DISEN;
 
 // delayed cursor for teletext
-always @(posedge CLOCK) if (CLKEN) cursor_invert_delayed <= cursor_invert;
+always @(posedge CLOCK) begin
+	if (CLKEN_CRTC)	cursor_invert_d1 <= cursor_invert;
+	if (CLKEN) begin
+		cursor_invert_d2 <= cursor_invert_d1;
+		cursor_invert_d3 <= cursor_invert_d2;
+		cursor_invert_d4 <= cursor_invert_d3;
+		cursor_invert_delayed <= cursor_invert_d4;
+	end
+end
+
+// delayed display enable for teletext
+always @(posedge CLOCK) begin
+	if (CLKEN_CRTC)	teletext_delayed_disen_d1 <= DE;
+	if (CLKEN) begin
+		teletext_delayed_disen_d2 <= teletext_delayed_disen_d1;
+		teletext_delayed_disen_d3 <= teletext_delayed_disen_d2;
+		teletext_delayed_disen_d4 <= teletext_delayed_disen_d3;
+		teletext_delayed_disen <= teletext_delayed_disen_d4;
+	end
+end
 
 always @(posedge CLOCK) begin
 
@@ -268,6 +298,7 @@ always @(posedge CLOCK) begin
             R <= red_val & delayed_disen ^ cursor_invert;
             G <= green_val & delayed_disen ^ cursor_invert;
             B <= blue_val & delayed_disen ^ cursor_invert;
+						BLANK <= ~delayed_disen;
 
         end
         else begin
@@ -275,7 +306,7 @@ always @(posedge CLOCK) begin
             R <= R_IN ^ cursor_invert_delayed;
             G <= G_IN ^ cursor_invert_delayed;
             B <= B_IN ^ cursor_invert_delayed;
-
+						BLANK <= ~teletext_delayed_disen;
         end
 
     end

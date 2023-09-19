@@ -15,6 +15,7 @@ module bbc(
 	output      VIDEO_G,
 	output      VIDEO_B,
 	output      VIDEO_DE,
+	output      VIDEO_VDE,
 
 	// RAM Interface (CPU)
 	output [15:0] MEM_ADR,
@@ -83,7 +84,7 @@ assign MEM_SYNC = cpu_clken;
 assign ROMSEL = romsel;
 assign ACC_Y = acc_y;
 assign PHI0 = cpu_phi0;
-assign VIDEO_DE = crtc_de;
+assign VIDEO_DE = ~vidproc_blank;
 assign SHADOW_VID = acc_d;
 
 wire 		  ram_we;
@@ -164,11 +165,12 @@ wire    [4:0] crtc_ra;
 reg     [14:0] display_a; 
 
 //  "VIDPROC" signals
-wire    vidproc_invert_n; 
-wire    vidproc_disen;  
+wire    vidproc_invert_n;
+wire    vidproc_disen;
+wire    vidproc_blank;
 
 // ADC signals
-wire    [7:0] adc_do; 
+wire    [7:0] adc_do;
 
 //  SAA5050 signals
 wire    ttxt_glr; 
@@ -507,7 +509,7 @@ adc ADC (
 	 .ch2 ( joy1_axis0 ),
 	 .ch3 ( joy1_axis1 )
 );
-
+/*
 mc6845 CRTC (
 	 .CLOCK(CLK48M_I),
 	 .CLKEN(crtc_clken),
@@ -522,6 +524,26 @@ mc6845 CRTC (
 	 .DE(crtc_de),
 	 .CURSOR(crtc_cursor),
 	 .LPSTB(crtc_lpstb),
+	 .MA(crtc_ma),
+	 .RA(crtc_ra)
+);
+*/
+UM6845R CRTC (
+	 .CLOCK(CLK48M_I),
+	 .CLKEN(crtc_clken),
+	 .nRESET(reset_n),
+	 .ENABLE(crtc_enable),
+	 .nCS(1'b0),
+	 .R_nW(cpu_r_nw),
+	 .RS(cpu_a[0]),
+	 .DI(cpu_do),
+	 .DO(crtc_do),
+	 .VSYNC	(VSYNC),
+	 .HSYNC  (HSYNC),
+	 .DE(crtc_de),
+	 .DE_V(VIDEO_VDE),
+	 .CURSOR(crtc_cursor),
+	 //.LPSTB(crtc_lpstb),
 	 .MA(crtc_ma),
 	 .RA(crtc_ra)
 );
@@ -552,14 +574,17 @@ vidproc VIDEO_ULA (
 		.nINVERT(vidproc_invert_n),
 		.DISEN(vidproc_disen),
 		.CURSOR(crtc_cursor),
-		
+
 		.R_IN		( ttxt_r		),
 		.G_IN		( ttxt_g		),
 		.B_IN		( ttxt_b		),
-		
+
 		.R			( VIDEO_R	),
 		.G			( VIDEO_G	),
-		.B			( VIDEO_B 	)
+		.B			( VIDEO_B ),
+
+		.DE     ( crtc_de ),
+		.BLANK  ( vidproc_blank )
 );
 
 saa5050 TELETEXT (

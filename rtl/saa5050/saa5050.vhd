@@ -99,6 +99,7 @@ architecture rtl of saa5050 is
 
 -- Register inputs in the bus clock domain
 signal di_r         :   std_logic_vector(6 downto 0);
+signal di_rr        :   std_logic_vector(6 downto 0);
 signal dew_r        :   std_logic;
 signal lose_r       :   std_logic;
 -- Data input registered in the pixel clock domain
@@ -182,13 +183,15 @@ begin
     begin
         if nRESET = '0' then
             di_r <= (others => '0');
-            dew_r <= '0';
-            lose_r <= '0';
+            --dew_r <= '0';
+            --lose_r <= '0';
+						--disp_enable <= '0';
         elsif rising_edge(DI_CLOCK) then
             if DI_CLKEN = '1' then
-                di_r <= DI;
-                dew_r <= DEW;
-                lose_r <= LOSE;
+								di_r <= DI;
+                --dew_r <= DEW;
+                --lose_r <= LOSE;
+								--disp_enable <= LOSE;
             end if;
         end if;
     end process;
@@ -225,7 +228,7 @@ begin
         if nRESET = '0' then
             dew_latch <= '0';
             lose_latch <= '0';
-            disp_enable <= '0';
+            --disp_enable <= '0';
             disp_enable_latch <= '0';
             double_high1 <= '0';
             double_high2 <= '0';
@@ -234,6 +237,9 @@ begin
             flash_counter <= (others => '0');
         elsif rising_edge(CLOCK) then
             if CLKEN = '1' then
+                dew_r <= DEW;
+                lose_r <= LOSE;
+								disp_enable <= LOSE;
                 -- Register syncs for edge detection
                 dew_latch <= dew_r;
                 lose_latch <= lose_r;
@@ -248,7 +254,7 @@ begin
                 if pixel_counter = 11 then
                     -- Start of next character and delayed display enable
                     pixel_counter <= (others => '0');
-                    disp_enable <= lose_latch;
+                    --disp_enable <= lose_latch;
                 else
                     pixel_counter <= pixel_counter + 1;
                 end if;
@@ -257,7 +263,7 @@ begin
                 if lose_r = '1' and lose_latch = '0' then
                     -- Reset pixel counter - small offset to make the output
                     -- line up with the cursor from the video ULA
-                    pixel_counter <= "0010";
+                    pixel_counter <= "0000";
                 end if;
 
                 -- Count frames on end of VSYNC (falling edge of DEW)
@@ -272,7 +278,7 @@ begin
                     double_high2 <= '0';
                 else
                     -- Count lines on end of active video (falling edge of disp_enable)
-                    if disp_enable = '0' and disp_enable_latch = '1' and (VGA = '0' or CRS = '1') then
+                    if disp_enable_latch = '0' and disp_enable_r = '1' and (VGA = '0' or CRS = '1') then
                         if line_counter = 9 then
                             line_counter <= (others => '0');
 

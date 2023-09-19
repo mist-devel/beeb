@@ -41,7 +41,7 @@ set_global_assignment -name DEVICE EP3C25E144C8
 set_global_assignment -name TOP_LEVEL_ENTITY bbc_mist_top
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 13.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "13:11:51  AUGUST 27, 2015"
-set_global_assignment -name LAST_QUARTUS_VERSION "13.1 SP4.26"
+set_global_assignment -name LAST_QUARTUS_VERSION 13.1
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
@@ -55,8 +55,7 @@ set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 
-set_location_assignment PIN_54 -to CLOCK_27[0]
-set_location_assignment PIN_55 -to CLOCK_27[1]
+set_location_assignment PIN_54 -to CLOCK_27
 set_location_assignment PIN_144 -to VGA_R[5]
 set_location_assignment PIN_143 -to VGA_R[4]
 set_location_assignment PIN_142 -to VGA_R[3]
@@ -129,7 +128,7 @@ set_location_assignment PIN_65 -to AUDIO_L
 set_location_assignment PIN_80 -to AUDIO_R
 
 set_global_assignment -name ENABLE_SIGNALTAP OFF
-set_global_assignment -name USE_SIGNALTAP_FILE output_files/ram.stp
+set_global_assignment -name USE_SIGNALTAP_FILE output_files/fdc.stp
 set_global_assignment -name ENABLE_CONFIGURATION_PINS OFF
 set_global_assignment -name ENABLE_NCE_PIN OFF
 set_global_assignment -name ENABLE_BOOT_SEL_PIN OFF
@@ -164,25 +163,9 @@ set_global_assignment -name PHYSICAL_SYNTHESIS_MAP_LOGIC_TO_MEMORY_FOR_AREA ON
 set_location_assignment PLL_1 -to CLOCKS|altpll_component|auto_generated|pll1
 set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
 set_global_assignment -name SMART_RECOMPILE ON
+set_global_assignment -name QIP_FILE ../../rtl/bbc.qip
 set_global_assignment -name VERILOG_FILE ../rtl/sigma_delta_dac.v
 set_global_assignment -name VERILOG_FILE ../rtl/audio.v
-set_global_assignment -name VERILOG_FILE ../../rtl/adc.v
-set_global_assignment -name VHDL_FILE ../../rtl/rtc.vhd
-set_global_assignment -name VERILOG_FILE ../../rtl/ps2_intf.v
-set_global_assignment -name VERILOG_FILE ../../rtl/vidproc.v
-set_global_assignment -name VERILOG_FILE ../../rtl/keyboard.v
-set_global_assignment -name VERILOG_FILE ../../rtl/clocks.v
-set_global_assignment -name VERILOG_FILE ../../rtl/address_decode.v
-set_global_assignment -name VERILOG_FILE ../../rtl/bbc.v
-set_global_assignment -name VHDL_FILE ../../rtl/mc6845.vhd
-set_global_assignment -name VHDL_FILE ../../rtl/via6522.vhd
-set_global_assignment -name VHDL_FILE ../../rtl/saa5050/saa5050_rom_dual_port.vhd
-set_global_assignment -name VHDL_FILE ../../rtl/saa5050/saa5050.vhd
-set_global_assignment -name QIP_FILE "../../rtl/sn76489-1.0/sn76489.qip"
-set_global_assignment -name QIP_FILE ../../rtl/T65/T65.qip
-set_global_assignment -name VHDL_FILE ../../rtl/AlanD/R65Cx2.vhd
-set_global_assignment -name VERILOG_FILE "../../rtl/fdc1772-verilator/floppy.v"
-set_global_assignment -name VERILOG_FILE "../../rtl/fdc1772-verilator/fdc1772.v"
 set_global_assignment -name SDC_FILE bbc_mist.sdc
 set_global_assignment -name SYSTEMVERILOG_FILE bbc_mist_top.sv
 set_global_assignment -name VERILOG_FILE "mist-modules/sd_card.v"

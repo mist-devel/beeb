@@ -3,6 +3,7 @@ db/
 incremental_db/
 output_files/
 greybox_tmp
+build_id.v
 PLLJ_PLLSPE_INFO.txt
 *.qws
 *.bak
