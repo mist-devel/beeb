@@ -74,7 +74,14 @@ module bbc(
 	input   [5:0] cmos_addr,
 	input         cmos_we,
 	input   [7:0] cmos_di,
-	output  [7:0] cmos_do
+	output  [7:0] cmos_do,
+
+	//Serial port
+	input         RS232_CTS,
+	output        RS232_RTS,
+	input         RS232_RX,
+	output        RS232_TX,
+	output        CASS_MOTOR
 );
 
 wire   master = MODEL_I;
@@ -267,6 +274,19 @@ wire     rtc_ce;
 wire     rtc_r_nw;
 wire     rtc_as;
 wire     rtc_ds;
+
+// SERPROC
+wire     serproc_rx_clk_en;
+wire     serproc_tx_clk_en;
+wire     serproc_cts_n;
+wire     serproc_dcd_n;
+wire     serproc_rts_n;
+wire     serproc_rx;
+wire     serproc_tx;
+
+// ACIA
+wire     [7:0] acia_do;
+wire     acia_irq_n;
 
 // FDC1770
 wire     fdc_irq;
@@ -645,6 +665,45 @@ always @(posedge CLK48M_I) begin
 	end
 end
 
+// Serial processor (SERPROC)
+serproc serproc (
+	.CLOCK(CLK48M_I),
+	.nRESET(reset_n),
+	.CS(serproc_enable),
+	.DI(cpu_do),
+	.RX_CLK_EN(serproc_rx_clk_en),
+	.TX_CLK_EN(serproc_tx_clk_en),
+	.CTS_N(serproc_cts_n),
+	.DCD_N(serproc_dcd_n),
+	.RTS_N(serproc_rts_n),
+	.RX(serproc_rx),
+	.TX(serproc_tx),
+
+	.RS232_CTS(RS232_CTS),
+	.RS232_RTS(RS232_RTS),
+	.RS232_RX(RS232_RX),
+	.RS232_TX(RS232_TX),
+	.CASS_MOTOR(CASS_MOTOR)
+);
+
+gen_uart_mc_6850 acia (
+	.reset(!reset_n),
+	.clk(CLK48M_I),
+	.rx_clk_en(serproc_rx_clk_en),
+	.tx_clk_en(serproc_tx_clk_en),
+	.din(cpu_do),
+	.dout(acia_do),
+	.rnw(cpu_r_nw),
+	.cs(acia_enable),
+	.rs(cpu_a[0]),
+	.irq_n(acia_irq_n),
+	.cts_n(serproc_cts_n),
+	.dcd_n(serproc_dcd_n),
+	.rts_n(serproc_rts_n),
+	.rx(serproc_rx),
+	.tx(serproc_tx)
+);
+
 // RTC/CMOS (Master)
 // RTC/CMOS is controlled from the system
 // PB7 -> address strobe (AS) active high
@@ -836,7 +895,7 @@ assign cpu_di = ram_enable ? MEM_DI :
 	rom_enable ? MEM_DI : 
 	mos_enable ? MEM_DI :
 	crtc_enable ? crtc_do : 
-	acia_enable ? 8'b 00000010 : 
+	acia_enable ? acia_do : 
 	sys_via_enable ? sys_via_do : 
 	user_via_enable ? user_via_do : 
 	adc_enable ? adc_do : 
@@ -848,7 +907,7 @@ assign cpu_di = ram_enable ? MEM_DI :
 	8'd0;
 
 //  un-decoded locations are pulled down by RP1
-assign cpu_irq_n = ~sys_via_irq & ~user_via_irq & ~acc_irr; // & tube_irq_n;
+assign cpu_irq_n = ~sys_via_irq & ~user_via_irq & ~acc_irr & acia_irq_n; // & tube_irq_n;
 assign cpu_nmi_n = ~fdc_irq & ~fdc_drq;
 
 // can we write to ram? Further decodig happens on top-level to deal with sideways ram etc

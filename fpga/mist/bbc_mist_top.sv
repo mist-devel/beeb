@@ -85,10 +85,14 @@ module bbc_mist_top(
 `ifdef USE_AUDIO_IN
 	input         AUDIO_IN,
 `endif
-
+`ifdef USE_EXPANSION
+	input         UART_CTS,
+	output        UART_RTS,
+	inout         EXP7,
+	inout         MOTOR_CTRL,
+`endif
 	input         UART_RX,
 	output        UART_TX
-
 );
 
 `ifdef NO_DIRECT_UPLOAD
@@ -155,6 +159,9 @@ parameter CONF_STR = {
         "O4,Mode,Model B,Master;",
         "O5,ROM mapping,High,Low;",
         "O6,Auto boot,Off,On;",
+`ifndef USE_EXPANSION
+        "O7,Userport,Tape,UART;",
+`endif
         "R64,Save CMOS;",
         "T0,Reset;"
 };
@@ -164,6 +171,7 @@ wire       joyswap = status[3];
 wire       model = status[4];
 wire       rommap = status[5];
 wire       autoboot = status[6];
+wire       uart_en = status[7];
 
 // generated clocks
 wire clk_48m /* synthesis keep */ ;
@@ -210,6 +218,19 @@ clockgen CLOCKS(
 	.c0		(clk_48m),
 	.locked	(pll_ready)  // pll locked output
 );
+
+
+wire uart_rts, uart_cts, cass_motor;
+`ifdef USE_EXPANSION
+assign MOTOR_CTRL = cass_motor ? 1'b0 : 1'bZ;
+assign UART_TX = uart_tx;
+assign UART_RTS = uart_rts;
+assign uart_cts = UART_CTS;
+assign EXP7 = 1'bZ;
+`else
+assign UART_TX = uart_en ? uart_tx : ~cass_motor;
+assign uart_cts = 0;
+`endif
 
 // conections between user_io (implementing the SPI communication 
 // to the io controller) and the legacy 
@@ -486,6 +507,12 @@ bbc BBC(
 
 	.AUDIO_L	( coreaud_l     ),
 	.AUDIO_R	( coreaud_r     ),
+
+	.RS232_CTS    ( uart_cts ),
+	.RS232_RTS    ( uart_rts ),
+	.CASS_MOTOR   ( cass_motor ),
+	.RS232_RX     ( UART_RX ),
+	.RS232_TX     ( uart_tx ),
 
 	// FDC connection
 	.img_mounted    ( img_mounted[1] ),
