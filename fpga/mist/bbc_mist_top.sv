@@ -85,7 +85,7 @@ module bbc_mist_top(
 `ifdef USE_AUDIO_IN
 	input         AUDIO_IN,
 `endif
-`ifdef USE_EXPANSION
+`ifdef SIDI128_EXPANSION
 	input         UART_CTS,
 	output        UART_RTS,
 	inout         EXP7,
@@ -159,7 +159,7 @@ parameter CONF_STR = {
         "O4,Mode,Model B,Master;",
         "O5,ROM mapping,High,Low;",
         "O6,Auto boot,Off,On;",
-`ifndef USE_EXPANSION
+`ifndef SIDI128_EXPANSION
         "O7,Userport,Tape,UART;",
 `endif
         "R64,Save CMOS;",
@@ -221,7 +221,7 @@ clockgen CLOCKS(
 
 
 wire uart_rts, uart_cts, cass_motor;
-`ifdef USE_EXPANSION
+`ifdef SIDI128_EXPANSION
 assign MOTOR_CTRL = cass_motor ? 1'b0 : 1'bZ;
 assign UART_TX = uart_tx;
 assign UART_RTS = uart_rts;
