@@ -32,6 +32,7 @@ module clocks(
 		input reset_n,
 		input mhz1_enable,
 		
+		output wire mhz6_clken,
 		output wire mhz4_clken,
 		output wire mhz2_clken,
 		output wire mhz1_clken,
@@ -71,6 +72,8 @@ assign vid_clken =
 	clken_counter == 40 ||
 	clken_counter == 43 ||
 	clken_counter == 46;
+
+assign mhz6_clken = clken_counter == 15 || clken_counter == 31 || clken_counter == 47;
 //  1,3,5...
 assign mhz4_clken = clken_counter == 11 || clken_counter == 23 || clken_counter == 35 || clken_counter == 47;
 //  15/31

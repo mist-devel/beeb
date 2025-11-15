@@ -101,6 +101,7 @@ reg     [7:0] romsel;
 
 // clock enable signals
 
+wire    mhz6_clken;
 wire    mhz4_clken;
 wire    mhz2_clken;
 wire    mhz1_clken;
@@ -214,6 +215,11 @@ wire    sound_ready;
 wire    [7:0] sound_di;
 wire    [7:0] sound_ao;
 
+// Music5000
+wire    [15:0] music5000_ao_l;
+wire    [15:0] music5000_ao_r;
+wire    [7:0] music5000_do;
+
 //  System VIA signals
 wire    [7:0] sys_via_do;
 wire    sys_via_irq; 
@@ -317,25 +323,26 @@ reg     [3:0]  process_3_aa;
 
 clocks CLOCKS(
 
-	.clk_48m			( CLK48M_I	), // master clock
-	.reset_n			( reset_n	),
+	.clk_48m			( CLK48M_I     ), // master clock
+	.reset_n			( reset_n      ),
 	
-	.vid_clken		( VIDEO_CLKEN		),
+	.vid_clken		( VIDEO_CLKEN  ),
 	
-	.mhz4_clken		( mhz4_clken	),
-	.mhz2_clken		( mhz2_clken	),
-	.mhz1_clken		( mhz1_clken	),
+	.mhz6_clken		( mhz6_clken   ),
+	.mhz4_clken		( mhz4_clken   ),
+	.mhz2_clken		( mhz2_clken   ),
+	.mhz1_clken		( mhz1_clken   ),
 
-	.mhz1_enable	( mhz1_enable	),
+	.mhz1_enable	( mhz1_enable  ),
 
-	.cpu_cycle		( cpu_cycle		),
-	.cpu_clken		( cpu_clken		),
-	.cpu_phi0     ( cpu_phi0    ),
+	.cpu_cycle		( cpu_cycle    ),
+	.cpu_clken		( cpu_clken    ),
+	.cpu_phi0      ( cpu_phi0     ),
 
-	.ttxt_clken		( ttxt_clken	),
-	.ttxt_clkenx2	( ttxt_clkenx2	),
+	.ttxt_clken		( ttxt_clken   ),
+	.ttxt_clkenx2	( ttxt_clkenx2 ),
 
-	.tube_clken		( tube_clken	)
+	.tube_clken		( tube_clken   )
 );
 
 address_decode ADDRDECODE(
@@ -580,6 +587,23 @@ sn76489_top SOUND (
 	.d_i        ( sound_di     ),
 	.aout_o     ( sound_ao     )
 );
+
+Music5000 Music5000 (
+	.clk        ( CLK48M_I     ),
+	.clken      ( mhz1_clken   ),
+	.clk6       ( CLK48M_I     ),
+	.clk6en     ( mhz6_clken   ),
+	.rnw        ( cpu_r_nw     ),
+	.rst_n      ( reset_n      ),
+	.pgfc_n     ( ~io_fred     ),
+	.pgfd_n     ( ~io_jim      ),
+	.a          ( cpu_a[7:0]   ),
+	.din        ( cpu_do       ),
+	.dout       ( music5000_do ),
+	.audio_l    ( music5000_ao_l ),
+	.audio_r    ( music5000_ao_r )
+);
+
 `endif
 
 vidproc VIDEO_ULA (
@@ -856,8 +880,8 @@ always @(crtc_ma or crtc_ra or disp_addr_offs) begin : process_3
 end
 
 // SOUND 
-assign AUDIO_L = {sound_ao, 8'b00000000};
-assign AUDIO_R = {sound_ao, 8'b00000000};
+assign AUDIO_L = {2'b00, sound_ao, 6'b000000} + {~music5000_ao_l[15], music5000_ao_l[14:0]};
+assign AUDIO_R = {2'b00, sound_ao, 6'b000000} + {~music5000_ao_r[15], music5000_ao_r[14:0]};
 
 //  VIDPROC
 assign vidproc_invert_n = 1'b 1; 
@@ -894,6 +918,7 @@ assign cpu_di = ram_enable ? MEM_DI :
 	acccon_enable ? acccon :
 	(romsel_enable & master) ? romsel :
 	fdc_enable ? fdc_do :
+	io_jim ? music5000_do :
 	//tube_enable === 1'b 1 ? tube_do : 
 	//adlc_enable === 1'b 1 ? bbcddr_out :
 	8'd0;

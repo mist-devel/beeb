@@ -627,8 +627,8 @@ i2s i2s (
 	.lrclk(I2S_LRCK),
 	.sdata(I2S_DATA),
 
-	.left_chan(coreaud_l),
-	.right_chan(coreaud_r)
+	.left_chan({~coreaud_l[15], coreaud_l[14:0]}),
+	.right_chan({~coreaud_r[15], coreaud_r[14:0]})
 );
 `ifdef I2S_AUDIO_HDMI
 assign HDMI_MCLK = 0;
