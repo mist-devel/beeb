@@ -2,20 +2,20 @@
 
 module bbc(
 
-	input		    CLK48M_I,
-	input       RESET_I,
+	input		     CLK48M_I,
+	input         RESET_I,
 
-	input       MODEL_I,
+	input         MODEL_I,
 
-	output      HSYNC,
-	output      VSYNC,
+	output        HSYNC,
+	output        VSYNC,
 
-	output      VIDEO_CLKEN, 
-	output      VIDEO_R,
-	output      VIDEO_G,
-	output      VIDEO_B,
-	output      VIDEO_DE,
-	output      VIDEO_VDE,
+	output        VIDEO_CLKEN,
+	output        VIDEO_R,
+	output        VIDEO_G,
+	output        VIDEO_B,
+	output        VIDEO_DE,
+	output        VIDEO_VDE,
 
 	// RAM Interface (CPU)
 	output [15:0] MEM_ADR,
@@ -35,8 +35,8 @@ module bbc(
 	input         PS2_DAT,
 
 	// audio signal.
-	output [15:0]	AUDIO_L,
-	output [15:0]	AUDIO_R,
+	output [15:0] AUDIO_L,
+	output [15:0] AUDIO_R,
 
 	// externally pressed "shift" key for autoboot
 	input         SHIFT,
@@ -47,14 +47,14 @@ module bbc(
 	input         SDMISO,
 
 	// analog joystick input 
-	input [1:0]	 	joy_but,
-	input [7:0] 	joy0_axis0,
-	input [7:0] 	joy0_axis1,
-	input [7:0] 	joy1_axis0,
-	input [7:0] 	joy1_axis1,
+	input [1:0]   joy_but,
+	input [7:0]   joy0_axis0,
+	input [7:0]   joy0_axis1,
+	input [7:0]   joy1_axis0,
+	input [7:0]   joy1_axis1,
 
 	// boot settings
-	input [7:0]		DIP_SWITCH,
+	input [7:0]   DIP_SWITCH,
 
 	//FDC signals
 	input         img_mounted, // signaling that new image has been mounted
@@ -84,7 +84,7 @@ module bbc(
 	output        CASS_MOTOR
 );
 
-wire   master = MODEL_I;
+wire    master = MODEL_I;
 
 // let sdram state machine synchronize to cpu
 assign MEM_SYNC = cpu_clken;
@@ -94,24 +94,24 @@ assign PHI0 = cpu_phi0;
 assign VIDEO_DE = ~vidproc_blank;
 assign SHADOW_VID = acc_d;
 
-wire 		  ram_we;
+wire    ram_we;
 
 //  ROM select latch
-reg  [7:0] romsel;
+reg     [7:0] romsel;
 
 // clock enable signals
 
-wire mhz4_clken;
-wire mhz2_clken;
-wire mhz1_clken;
+wire    mhz4_clken;
+wire    mhz2_clken;
+wire    mhz1_clken;
 
-wire ttxt_clken;
-wire ttxt_clkenx2;
-wire tube_clken;
+wire    ttxt_clken;
+wire    ttxt_clkenx2;
+wire    tube_clken;
 
-wire cpu_clken;
-wire cpu_cycle;
-wire cpu_phi0;
+wire    cpu_clken;
+wire    cpu_cycle;
+wire    cpu_phi0;
 
 // decode signals
 wire    ddr_enable;
@@ -125,21 +125,21 @@ wire    io_jim;
 wire    io_sheila; 
 
 // SHEILA
-wire     crtc_enable; 
-wire     acia_enable; 
-wire     serproc_enable; 
-wire     vidproc_enable; 
-wire     romsel_enable; 
-wire     acccon_enable; 
-wire     sys_via_enable; 
-wire     user_via_enable; 
-wire     fddc_enable;
-wire     fdc_enable;
-wire     fdcon_enable; 
-wire     adlc_enable; 
-wire     adc_enable; 
-wire     tube_enable;
-wire 	   mhz1_enable;
+wire    crtc_enable;
+wire    acia_enable;
+wire    serproc_enable;
+wire    vidproc_enable;
+wire    romsel_enable;
+wire    acccon_enable;
+wire    sys_via_enable;
+wire    user_via_enable;
+wire    fddc_enable;
+wire    fdc_enable;
+wire    fdcon_enable;
+wire    adlc_enable;
+wire    adc_enable;
+wire    tube_enable;
+wire 	  mhz1_enable;
 
 //  CPU signals
 //  6502
@@ -189,8 +189,8 @@ wire    ttxt_g;
 wire    ttxt_b; 
 
 //  Must loop back output pins or keyboard won't work
-wire [3:0] keyb_column = sys_via_pa_out[3:0]; 
-wire [2:0] keyb_row = sys_via_pa_out[6:4]; 
+wire    [3:0] keyb_column = sys_via_pa_out[3:0]; 
+wire    [2:0] keyb_row = sys_via_pa_out[6:4]; 
 wire    keyb_out; 
 wire    keyb_int; 
 wire    keyb_break;
@@ -244,58 +244,58 @@ wire    user_via_ca2_oe;
 wire    [7:0] user_via_pa_in;
 wire    [7:0] user_via_pa_out;
 wire    [7:0] user_via_pa_oe;
-wire     user_via_cb1_in;
-wire     user_via_cb1_out;
-wire     user_via_cb1_oe;
-wire     user_via_cb2_in;
-wire     user_via_cb2_out;
-wire     user_via_cb2_oe;
-wire     [7:0] user_via_pb_in;
-wire     [7:0] user_via_pb_out;
-wire     [7:0] user_via_pb_oe;
+wire    user_via_cb1_in;
+wire    user_via_cb1_out;
+wire    user_via_cb1_oe;
+wire    user_via_cb2_in;
+wire    user_via_cb2_out;
+wire    user_via_cb2_oe;
+wire    [7:0] user_via_pb_in;
+wire    [7:0] user_via_pb_out;
+wire    [7:0] user_via_pb_oe;
 
 // 0xFE34 Access Control (Master)
-wire     [7:0] acccon = { acc_irr, acc_tst, acc_ifj, acc_itu, acc_y, acc_x, acc_e, acc_d };
-reg      acc_irr;
-reg      acc_tst;
-reg      acc_ifj;
-reg      acc_itu;
-reg      acc_y;
-reg      acc_x;
-reg      acc_e;
-reg      acc_d;
+wire    [7:0] acccon = { acc_irr, acc_tst, acc_ifj, acc_itu, acc_y, acc_x, acc_e, acc_d };
+reg     acc_irr;
+reg     acc_tst;
+reg     acc_ifj;
+reg     acc_itu;
+reg     acc_y;
+reg     acc_x;
+reg     acc_e;
+reg     acc_d;
 
-reg      vdu_op; // last opcode was 0xC000-0xDFFF
+reg     vdu_op; // last opcode was 0xC000-0xDFFF
 
 // Master Real Time Clock / CMOS RAM
-wire     [7:0] rtc_adi;
-wire     [7:0] rtc_do;
-wire     rtc_ce;
-wire     rtc_r_nw;
-wire     rtc_as;
-wire     rtc_ds;
+wire    [7:0] rtc_adi;
+wire    [7:0] rtc_do;
+wire    rtc_ce;
+wire    rtc_r_nw;
+wire    rtc_as;
+wire    rtc_ds;
 
 // SERPROC
-wire     serproc_rx_clk_en;
-wire     serproc_tx_clk_en;
-wire     serproc_cts_n;
-wire     serproc_dcd_n;
-wire     serproc_rts_n;
-wire     serproc_rx;
-wire     serproc_tx;
+wire    serproc_rx_clk_en;
+wire    serproc_tx_clk_en;
+wire    serproc_cts_n;
+wire    serproc_dcd_n;
+wire    serproc_rts_n;
+wire    serproc_rx;
+wire    serproc_tx;
 
 // ACIA
-wire     [7:0] acia_do;
-wire     acia_irq_n;
+wire    [7:0] acia_do;
+wire    acia_irq_n;
 
 // FDC1770
-wire     fdc_irq;
-wire     fdc_drq;
-wire     [7:0] fdc_do;
-reg      [3:0] floppy_drive;
-reg      floppy_side;
-reg      floppy_density;
-reg      floppy_reset;
+wire    fdc_irq;
+wire    fdc_drq;
+wire    [7:0] fdc_do;
+reg     [3:0] floppy_drive;
+reg     floppy_side;
+reg     floppy_density;
+reg     floppy_reset;
 
 // MMC
 // SDCLK is driven from either PB1 or CB1 depending on the SR Mode
@@ -414,99 +414,99 @@ assign cpu_a = master ? cpu65c02_a : cpu6502_a;
 assign cpu_sync = master ? cpu65c02_sync : cpu6502_sync;
 
 via6522 SYS_VIA (
-	 .clock       (CLK48M_I),
-	 .rising      (mhz2_clken &  mhz1_clken),
-	 .falling     (mhz2_clken & ~mhz1_clken),
-	 .reset       (~reset_n),
+	.clock       (CLK48M_I),
+	.rising      (mhz2_clken &  mhz1_clken),
+	.falling     (mhz2_clken & ~mhz1_clken),
+	.reset       (~reset_n),
 
-	 .addr        (cpu_a[3:0]),
-	 .wen         (sys_via_enable & ~cpu_r_nw),
-	 .ren         (sys_via_enable &  cpu_r_nw),
-	 .data_in     (cpu_do),
-	 .data_out    (sys_via_do),
+	.addr        (cpu_a[3:0]),
+	.wen         (sys_via_enable & ~cpu_r_nw),
+	.ren         (sys_via_enable &  cpu_r_nw),
+	.data_in     (cpu_do),
+	.data_out    (sys_via_do),
 
-    //-- pio --
-	 .port_a_i    (sys_via_pa_in),
-	 .port_a_o    (sys_via_pa_out),
-	 .port_a_t    (sys_via_pa_oe),
+	//-- pio --
+	.port_a_i    (sys_via_pa_in),
+	.port_a_o    (sys_via_pa_out),
+	.port_a_t    (sys_via_pa_oe),
 
-	 .port_b_i    (sys_via_pb_in),
-	 .port_b_o    (sys_via_pb_out),
-	 .port_b_t    (sys_via_pb_oe),
+	.port_b_i    (sys_via_pb_in),
+	.port_b_o    (sys_via_pb_out),
+	.port_b_t    (sys_via_pb_oe),
 
-    //-- handshake pins
-	 .ca1_i       (sys_via_ca1_in),
+	//-- handshake pins
+	.ca1_i       (sys_via_ca1_in),
 
-	 .ca2_i       (sys_via_ca2_in),
-	 .ca2_o       (sys_via_ca2_out),
-	 .ca2_t       (sys_via_ca2_oe),
+	.ca2_i       (sys_via_ca2_in),
+	.ca2_o       (sys_via_ca2_out),
+	.ca2_t       (sys_via_ca2_oe),
 
-	 .cb1_i       (sys_via_cb1_in),
-	 .cb1_o       (sys_via_cb1_out),
-	 .cb1_t       (sys_via_cb1_oe),
+	.cb1_i       (sys_via_cb1_in),
+	.cb1_o       (sys_via_cb1_out),
+	.cb1_t       (sys_via_cb1_oe),
 
-	 .cb2_i       (sys_via_cb2_in),
-	 .cb2_o       (sys_via_cb2_out),
-	 .cb2_t       (sys_via_cb2_oe),
+	.cb2_i       (sys_via_cb2_in),
+	.cb2_o       (sys_via_cb2_out),
+	.cb2_t       (sys_via_cb2_oe),
 
-	 .irq         (sys_via_irq)
+	.irq         (sys_via_irq)
 );
 
 via6522 USER_VIA (
-	 .clock       (CLK48M_I),
-	 .rising      (mhz2_clken &  mhz1_clken),
-	 .falling     (mhz2_clken & ~mhz1_clken),
-	 .reset       (~reset_n),
+	.clock       (CLK48M_I),
+	.rising      (mhz2_clken &  mhz1_clken),
+	.falling     (mhz2_clken & ~mhz1_clken),
+	.reset       (~reset_n),
 
-	 .addr        (cpu_a[3:0]),
-	 .wen         (user_via_enable & ~cpu_r_nw),
-	 .ren         (user_via_enable &  cpu_r_nw),
-	 .data_in     (cpu_do),
-	 .data_out    (user_via_do),
+	.addr        (cpu_a[3:0]),
+	.wen         (user_via_enable & ~cpu_r_nw),
+	.ren         (user_via_enable &  cpu_r_nw),
+	.data_in     (cpu_do),
+	.data_out    (user_via_do),
 
-    //-- pio --
-	 .port_a_i    (user_via_pa_in),
-	 .port_a_o    (user_via_pa_out),
-	 .port_a_t    (user_via_pa_oe),
+	//-- pio --
+	.port_a_i    (user_via_pa_in),
+	.port_a_o    (user_via_pa_out),
+	.port_a_t    (user_via_pa_oe),
 
-	 .port_b_i    (user_via_pb_in),
-	 .port_b_o    (user_via_pb_out),
-	 .port_b_t    (user_via_pb_oe),
+	.port_b_i    (user_via_pb_in),
+	.port_b_o    (user_via_pb_out),
+	.port_b_t    (user_via_pb_oe),
 
-    //-- handshake pins
-	 .ca1_i       (user_via_ca1_in),
+	//-- handshake pins
+	.ca1_i       (user_via_ca1_in),
 
-	 .ca2_i       (user_via_ca2_in),
-	 .ca2_o       (user_via_ca2_out),
-	 .ca2_t       (user_via_ca2_oe),
+	.ca2_i       (user_via_ca2_in),
+	.ca2_o       (user_via_ca2_out),
+	.ca2_t       (user_via_ca2_oe),
 
-	 .cb1_i       (user_via_cb1_in),
-	 .cb1_o       (user_via_cb1_out),
-	 .cb1_t       (user_via_cb1_oe),
+	.cb1_i       (user_via_cb1_in),
+	.cb1_o       (user_via_cb1_out),
+	.cb1_t       (user_via_cb1_oe),
 
-	 .cb2_i       (user_via_cb2_in),
-	 .cb2_o       (user_via_cb2_out),
-	 .cb2_t       (user_via_cb2_oe),
+	.cb2_i       (user_via_cb2_in),
+	.cb2_o       (user_via_cb2_out),
+	.cb2_t       (user_via_cb2_oe),
 
-	 .irq         (user_via_irq)
+	.irq         (user_via_irq)
 );
 
 //  Keyboard	
 keyboard KEYB (	
 
-	 .CLOCK			( CLK48M_I		),
-	 .nRESET			( ~RESET_I		),
-	 .CLKEN_1MHZ	( mhz1_clken	),
-	 .PS2_CLK		( PS2_CLK		),
-	 .PS2_DATA		( PS2_DAT		),
-	 .AUTOSCAN		( keyb_enable_n),
-	 .COLUMN			( keyb_column	),
-	 .ROW				( keyb_row		),
-	 .KEYPRESS		( keyb_out		),
-	 .INT				( keyb_int		),
-	 .SHIFT        ( SHIFT        ),
-	 .BREAK_OUT		( keyb_break	),
-	 .DIP_SWITCH	( DIP_SWITCH	)
+	.CLOCK       ( CLK48M_I    ),
+	.nRESET      ( ~RESET_I    ),
+	.CLKEN_1MHZ  ( mhz1_clken  ),
+	.PS2_CLK     ( PS2_CLK     ),
+	.PS2_DATA    ( PS2_DAT     ),
+	.AUTOSCAN    (keyb_enable_n),
+	.COLUMN      ( keyb_column ),
+	.ROW         ( keyb_row    ),
+	.KEYPRESS    ( keyb_out    ),
+	.INT         ( keyb_int    ),
+	.SHIFT       ( SHIFT       ),
+	.BREAK_OUT   ( keyb_break  ),
+	.DIP_SWITCH  ( DIP_SWITCH  )
 );
 
 // sync keyboard reset
@@ -514,97 +514,97 @@ always @(posedge CLK48M_I)
 	if (cpu_clken) keyb_reset <= keyb_break;
 
 adc ADC (
-	 .CLOCK(CLK48M_I),
-	 .CLKEN(crtc_clken),
-	 .nRESET(reset_n),
-	 .ENABLE(adc_enable),
-	 .R_nW(cpu_r_nw),
-	 .A(cpu_a[1:0]),
-	 .DI(cpu_do),
-	 .DO(adc_do),
+	.CLOCK(CLK48M_I),
+	.CLKEN(crtc_clken),
+	.nRESET(reset_n),
+	.ENABLE(adc_enable),
+	.R_nW(cpu_r_nw),
+	.A(cpu_a[1:0]),
+	.DI(cpu_do),
+	.DO(adc_do),
 
-	 // adc is used for analog joystick input 
-	 .ch0 ( joy0_axis0 ),
-	 .ch1 ( joy0_axis1 ),
-	 .ch2 ( joy1_axis0 ),
-	 .ch3 ( joy1_axis1 )
+	// adc is used for analog joystick input 
+	.ch0 ( joy0_axis0 ),
+	.ch1 ( joy0_axis1 ),
+	.ch2 ( joy1_axis0 ),
+	.ch3 ( joy1_axis1 )
 );
 /*
 mc6845 CRTC (
-	 .CLOCK(CLK48M_I),
-	 .CLKEN(crtc_clken),
-	 .nRESET(reset_n),
-	 .ENABLE(crtc_enable),
-	 .R_nW(cpu_r_nw),
-	 .RS(cpu_a[0]),
-	 .DI(cpu_do),
-	 .DO(crtc_do),
-	 .VSYNC	(VSYNC),
-	 .HSYNC  (HSYNC),
-	 .DE(crtc_de),
-	 .CURSOR(crtc_cursor),
-	 .LPSTB(crtc_lpstb),
-	 .MA(crtc_ma),
-	 .RA(crtc_ra)
+	.CLOCK(CLK48M_I),
+	.CLKEN(crtc_clken),
+	.nRESET(reset_n),
+	.ENABLE(crtc_enable),
+	.R_nW(cpu_r_nw),
+	.RS(cpu_a[0]),
+	.DI(cpu_do),
+	.DO(crtc_do),
+	.VSYNC	(VSYNC),
+	.HSYNC  (HSYNC),
+	.DE(crtc_de),
+	.CURSOR(crtc_cursor),
+	.LPSTB(crtc_lpstb),
+	.MA(crtc_ma),
+	.RA(crtc_ra)
 );
 */
 UM6845R CRTC (
-	 .CLOCK(CLK48M_I),
-	 .CLKEN(crtc_clken),
-	 .nRESET(reset_n),
-	 .ENABLE(crtc_enable),
-	 .nCS(1'b0),
-	 .R_nW(cpu_r_nw),
-	 .RS(cpu_a[0]),
-	 .DI(cpu_do),
-	 .DO(crtc_do),
-	 .VSYNC	(VSYNC),
-	 .HSYNC  (HSYNC),
-	 .DE(crtc_de),
-	 .DE_V(VIDEO_VDE),
-	 .CURSOR(crtc_cursor),
-	 //.LPSTB(crtc_lpstb),
-	 .MA(crtc_ma),
-	 .RA(crtc_ra)
+	.CLOCK(CLK48M_I),
+	.CLKEN(crtc_clken),
+	.nRESET(reset_n),
+	.ENABLE(crtc_enable),
+	.nCS(1'b0),
+	.R_nW(cpu_r_nw),
+	.RS(cpu_a[0]),
+	.DI(cpu_do),
+	.DO(crtc_do),
+	.VSYNC	(VSYNC),
+	.HSYNC  (HSYNC),
+	.DE(crtc_de),
+	.DE_V(VIDEO_VDE),
+	.CURSOR(crtc_cursor),
+	//.LPSTB(crtc_lpstb),
+	.MA(crtc_ma),
+	.RA(crtc_ra)
 );
 
 // no sound in the simulator.
 `ifndef SIM
 sn76489_top SOUND (
-		 .clock_i		( CLK48M_I		),
-		 .clock_en_i	( mhz4_clken	),
-		 .res_n_i		( reset_n		),
-		 .ce_n_i			( 1'b 0			),
-		 .we_n_i			( sound_enable_n	),
-		 .ready_o		( sound_ready	),
-		 .d_i				( sound_di		),
-		 .aout_o			( sound_ao		)
+	.clock_i    ( CLK48M_I     ),
+	.clock_en_i ( mhz4_clken   ),
+	.res_n_i    ( reset_n      ),
+	.ce_n_i     ( 1'b 0        ),
+	.we_n_i     ( sound_enable_n ),
+	.ready_o    ( sound_ready  ),
+	.d_i        ( sound_di     ),
+	.aout_o     ( sound_ao     )
 );
 `endif
 
 vidproc VIDEO_ULA (
-		.CLOCK(CLK48M_I),
-		.CLKEN(VIDEO_CLKEN),
-		.nRESET(reset_n),
-		.CLKEN_CRTC(crtc_clken),
-		.ENABLE(vidproc_enable),
-		.A0(cpu_a[0]),
-		.DI_CPU(cpu_do),
-		.DI_RAM(MEM_DI[7:0]),
-		.nINVERT(vidproc_invert_n),
-		.DISEN(vidproc_disen),
-		.CURSOR(crtc_cursor),
+	.CLOCK(CLK48M_I),
+	.CLKEN(VIDEO_CLKEN),
+	.nRESET(reset_n),
+	.CLKEN_CRTC(crtc_clken),
+	.ENABLE(vidproc_enable),
+	.A0(cpu_a[0]),
+	.DI_CPU(cpu_do),
+	.DI_RAM(MEM_DI[7:0]),
+	.nINVERT(vidproc_invert_n),
+	.DISEN(vidproc_disen),
+	.CURSOR(crtc_cursor),
 
-		.R_IN		( ttxt_r		),
-		.G_IN		( ttxt_g		),
-		.B_IN		( ttxt_b		),
+	.R_IN		( ttxt_r		),
+	.G_IN		( ttxt_g		),
+	.B_IN		( ttxt_b		),
 
-		.R			( VIDEO_R	),
-		.G			( VIDEO_G	),
-		.B			( VIDEO_B ),
+	.R			( VIDEO_R	),
+	.G			( VIDEO_G	),
+	.B			( VIDEO_B ),
 
-		.DE     ( crtc_de ),
-		.BLANK  ( vidproc_blank )
+	.DE     ( crtc_de ),
+	.BLANK  ( vidproc_blank )
 );
 
 saa5050 TELETEXT (
@@ -630,9 +630,9 @@ saa5050 TELETEXT (
 
 initial begin : via_init   
 
-   user_via_ca1_in = 1'b 0;
-   user_via_ca2_in = 1'b 0;
-   crtc_lpstb = 1'b 0;
+	user_via_ca1_in = 1'b 0;
+	user_via_ca2_in = 1'b 0;
+	crtc_lpstb = 1'b 0;
 
 end
 
@@ -815,53 +815,45 @@ always @(posedge CLK48M_I) begin
 end
 
 //  Address translation logic for calculation of display address
-always @(crtc_ma or crtc_ra or disp_addr_offs)
-   begin : process_3
-   if (crtc_ma[12] === 1'b 0)
-      begin
+always @(crtc_ma or crtc_ra or disp_addr_offs) begin : process_3
+	if (crtc_ma[12] === 1'b 0)
+		begin
+			//  No adjustment
+			process_3_aa = crtc_ma[11:8];
+		end
+		else
+		begin
+		//  Address adjusted according to screen mode to compensate for
+		//  wrap at 0x8000.
+		case (disp_addr_offs)
+			2'b 00:
+			begin
+				//  Mode 3 - restart at 0x4000
+				process_3_aa = crtc_ma[11:8] + 4'd8;
+			end
+			2'b 01:
+			begin
+				//  Mode 6 - restart at 0x6000
+				process_3_aa = crtc_ma[11:8] + 4'd12;
+			end
+			2'b 10:
+			begin
+			//  Mode 0,1,2 - restart at 0x3000
+				process_3_aa = crtc_ma[11:8] + 4'd6;
+			end
+			2'b 11:
+			begin
+				//  Mode 4,5 - restart at 0x5800
+				process_3_aa = crtc_ma[11:8] + 4'd11;
+			end
+			default: ;
+		endcase
+		end
 
-//  No adjustment
-      process_3_aa = crtc_ma[11:8];   
-
-//  Address adjusted according to screen mode to compensate for
-//  wrap at 0x8000.
-      end
-   else
-      begin
-      case (disp_addr_offs)
-      2'b 00:
-         begin
-
-//  Mode 3 - restart at 0x4000
-         process_3_aa = crtc_ma[11:8] + 4'd8;
-         end
-      2'b 01:
-         begin
-
-//  Mode 6 - restart at 0x6000
-         process_3_aa = crtc_ma[11:8] + 4'd12;
-         end
-      2'b 10:
-         begin
-
-//  Mode 0,1,2 - restart at 0x3000
-         process_3_aa = crtc_ma[11:8] + 4'd6;
-         end
-      2'b 11:
-         begin
-
-//  Mode 4,5 - restart at 0x5800
-         process_3_aa = crtc_ma[11:8] + 4'd11;
-         end
-      default:
-         ;
-      endcase
-      end
-
-      display_a = crtc_ma[13] ? 
-        {process_3_aa[3], 4'b 1111, crtc_ma[9:0]} :       // TTX VDU
-        {process_3_aa[3:0], crtc_ma[7:0], crtc_ra[2:0]};  // HI RES
-   end
+	display_a = crtc_ma[13] ?
+	  {process_3_aa[3], 4'b 1111, crtc_ma[9:0]} :       // TTX VDU
+	  {process_3_aa[3:0], crtc_ma[7:0], crtc_ra[2:0]};  // HI RES
+end
 
 // SOUND 
 assign AUDIO_L = {sound_ao, 8'b00000000};
