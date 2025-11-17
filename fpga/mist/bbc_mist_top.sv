@@ -153,7 +153,8 @@ assign LED = ~loader_active;
 // it to control the menu on the OSD 
 parameter CONF_STR = {
         "BBC;ROM;",
-        "S1U,SSDDSD,Mount Disk;",
+        "S1U,SSDDSD,Mount Disk 0;",
+        "S2U,SSDDSD,Mount Disk 1;",
         "O12,Scanlines,Off,25%,50%,75%;",
         "O3,Joystick Swap,Off,On;",
         "O4,Mode,Model B,Master;",
@@ -236,8 +237,8 @@ assign uart_cts = 0;
 // to the io controller) and the legacy 
 wire sd_busy;
 wire [31:0] sd_lba = sd_busy ? sd_lba_mmfs : sd_lba_fdc;
-wire [1:0] sd_rd;
-wire [1:0] sd_wr;
+wire [2:0] sd_rd;
+wire [2:0] sd_wr;
 wire sd_ack;
 wire sd_conf;
 wire sd_sdhc; 
@@ -246,7 +247,7 @@ wire sd_dout_strobe;
 wire [7:0] sd_din = sd_busy ? sd_din_mmfs : sd_din_fdc;
 wire [8:0] sd_buff_addr;
 wire sd_ack_conf;
-wire [1:0] img_mounted;
+wire [2:0] img_mounted;
 wire [31:0] img_size;
 
 wire [7:0] joystick_0;
@@ -269,7 +270,7 @@ wire        i2c_ack;
 wire        i2c_end;
 `endif
 
-user_io #(.STRLEN($size(CONF_STR)>>3), .FEATURES(32'h0 | (BIG_OSD << 13) | (HDMI << 14))) user_io(
+user_io #(.STRLEN($size(CONF_STR)>>3), .FEATURES(32'h0 | (BIG_OSD << 13) | (HDMI << 14)), .SD_IMAGES(3)) user_io(
 	.conf_str      ( CONF_STR       ),
 	.clk_sys       ( clk_48m        ),
 	.clk_sd        ( clk_48m        ),
@@ -515,12 +516,12 @@ bbc BBC(
 	.RS232_TX     ( uart_tx ),
 
 	// FDC connection
-	.img_mounted    ( img_mounted[1] ),
+	.img_mounted    ( img_mounted[2:1] ),
 	.img_size       ( img_size       ),
 	.img_ds         ( img_ds         ),
 	.sd_lba         ( sd_lba_fdc     ),
-	.sd_rd          ( sd_rd[1]       ),
-	.sd_wr          ( sd_wr[1]       ),
+	.sd_rd          ( sd_rd[2:1]     ),
+	.sd_wr          ( sd_wr[2:1]     ),
 	.sd_ack         ( sd_ack         ),
 	.sd_buff_addr   ( sd_buff_addr   ),
 	.sd_dout        ( sd_dout        ),

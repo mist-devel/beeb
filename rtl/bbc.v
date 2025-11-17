@@ -57,12 +57,12 @@ module bbc(
 	input [7:0]   DIP_SWITCH,
 
 	//FDC signals
-	input         img_mounted, // signaling that new image has been mounted
+	input   [1:0] img_mounted, // signaling that new image has been mounted
 	input  [31:0] img_size,    // size of image in bytes
 	input         img_ds,      // SSD/DSD file
 	output [31:0] sd_lba,
-	output        sd_rd,
-	output        sd_wr,
+	output  [1:0] sd_rd,
+	output  [1:0] sd_wr,
 	input         sd_ack,
 	input   [8:0] sd_buff_addr,
 	input   [7:0] sd_dout,
@@ -830,7 +830,7 @@ always @(posedge CLK48M_I) begin
 	end else if (cpu_clken) begin
 		// FE24 Drive control register
 		if (fdcon_enable & ~cpu_r_nw) begin
-			floppy_drive <= { 3'b111, ~cpu_do[0] };
+			floppy_drive <= { 2'b11, ~cpu_do[1:0] };
 			floppy_reset <= cpu_do[2];
 			floppy_side <= ~cpu_do[4];
 			floppy_density <= cpu_do[5];
