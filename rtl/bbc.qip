@@ -21,3 +21,6 @@ set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) music5000/
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) music5000/Ram2K.vhd]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) fdc1772-verilator/floppy.v]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) fdc1772-verilator/fdc1772.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) CoPro6502.v]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) tuberom_65c102.vhd]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) Tube/Tube.qip]

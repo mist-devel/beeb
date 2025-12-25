@@ -76,6 +76,13 @@ module bbc(
 	input   [7:0] cmos_di,
 	output  [7:0] cmos_do,
 
+	input   [1:0] tube_cfg,
+	// Co-proc RAM
+   output [15:0] tube_ram_addr,
+   output  [7:0] tube_ram_data_in,
+   input   [7:0] tube_ram_data_out,
+   output        tube_ram_wr,
+
 	//Serial port
 	input         RS232_CTS,
 	output        RS232_RTS,
@@ -141,6 +148,8 @@ wire    adlc_enable;
 wire    adc_enable;
 wire    tube_enable;
 wire 	  mhz1_enable;
+
+wire    int_tube_enable;
 
 //  CPU signals
 //  6502
@@ -315,6 +324,9 @@ assign SDMOSI = user_via_pb_oe[0] ? user_via_pb_out[0] : 1'b1;
 assign user_via_cb2_in = SDMISO;
 assign SDSS = 0;
 
+// Coproc
+wire    [7:0] tube_do;
+
 // calulation for display address
 
 reg     [3:0]  process_3_aa; 
@@ -342,6 +354,7 @@ clocks CLOCKS(
 	.ttxt_clken		( ttxt_clken   ),
 	.ttxt_clkenx2	( ttxt_clkenx2 ),
 
+	.tube_cfg      ( tube_cfg     ),
 	.tube_clken		( tube_clken   )
 );
 
@@ -372,6 +385,8 @@ address_decode ADDRDECODE(
 	.tube_enable(tube_enable),
 	.mhz1_enable(mhz1_enable)
 );
+
+assign int_tube_enable = |tube_cfg & (master ? (acc_itu & tube_enable) : tube_enable);
 
 wire  [7:0] cpu6502_do;
 wire [15:0] cpu6502_a;
@@ -605,6 +620,29 @@ Music5000 Music5000 (
 );
 
 `endif
+
+wire tube_cs_b = ~(int_tube_enable & cpu_clken);
+
+CoPro6502 copro1 (
+	.h_clk      ( CLK48M_I     ),
+   .h_cs_b     ( tube_cs_b    ),
+   .h_rdnw     ( cpu_r_nw     ),
+   .h_addr     ( cpu_a[2:0]   ),
+   .h_data_in  ( cpu_do       ),
+   .h_data_out ( tube_do      ),
+   .h_rst_b    ( reset_n      ),
+   .h_irq_b    ( ),
+   //Parasite
+   .clk_cpu    ( CLK48M_I     ),
+   .cpu_clken  ( tube_clken   ),
+   // External RAM
+   .ram_addr   ( tube_ram_addr ),
+   .ram_data_in( tube_ram_data_in ),
+   .ram_data_out(tube_ram_data_out),
+   .ram_wr     ( tube_ram_wr   ),
+   // Test signals for debugging
+   .test       ( )
+);
 
 vidproc VIDEO_ULA (
 	.CLOCK(CLK48M_I),
@@ -919,8 +957,10 @@ assign cpu_di = ram_enable ? MEM_DI :
 	(romsel_enable & master) ? romsel :
 	fdc_enable ? fdc_do :
 	io_jim ? music5000_do :
-	//tube_enable === 1'b 1 ? tube_do : 
+	int_tube_enable ? tube_do : 
 	//adlc_enable === 1'b 1 ? bbcddr_out :
+   io_sheila ? 8'b11111110 :
+   (io_jim | io_fred) ? 8'b11111111 :
 	8'd0;
 
 //  un-decoded locations are pulled down by RP1

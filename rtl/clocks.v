@@ -31,6 +31,7 @@ module clocks(
 		
 		input reset_n,
 		input mhz1_enable,
+		input [1:0] tube_cfg,
 		
 		output wire mhz6_clken,
 		output wire mhz4_clken,
@@ -79,7 +80,11 @@ assign mhz4_clken = clken_counter == 11 || clken_counter == 23 || clken_counter 
 //  15/31
 assign mhz2_clken = clken_counter == 23 || clken_counter == 47;
 // 23/47
-assign tube_clken = clken_counter == 1 || clken_counter == 25;
+assign tube_clken = tube_cfg == 1 ? mhz4_clken :
+                    tube_cfg == 2 ? (clken_counter == 1  || clken_counter == 7  || clken_counter == 13 || clken_counter == 19 || 
+                                     clken_counter == 25 || clken_counter == 31 || clken_counter == 37 || clken_counter == 43) :
+                    tube_cfg == 3 ? vid_clken :
+                    1'b0;
 // 1/25
 assign mhz1_clken = clken_counter == 47;
 // 47

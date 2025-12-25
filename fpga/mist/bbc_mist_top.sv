@@ -163,6 +163,9 @@ parameter CONF_STR = {
 `ifndef SIDI128_EXPANSION
         "O7,Userport,Tape,UART;",
 `endif
+`ifdef TUBE
+        "O89,Tube Co-Pro,Disabled,4 MHz,8 MHz,16 MHz;",
+`endif
         "R64,Save CMOS;",
         "T0,Reset;"
 };
@@ -173,6 +176,11 @@ wire       model = status[4];
 wire       rommap = status[5];
 wire       autoboot = status[6];
 wire       uart_en = status[7];
+`ifdef TUBE
+wire [1:0] tube = status[9:8];
+`else
+wire [1:0] tube = 0;
+`endif
 
 // generated clocks
 wire clk_48m /* synthesis keep */ ;
@@ -185,27 +193,32 @@ wire			core_clken;
 
 // memory bus signals.
 wire [15:0] mem_adr;
-wire [7:0]  mem_romsel;
+wire  [7:0] mem_romsel;
 wire        shadow_ram;
 wire        shadow_vid;
 wire        mem_acc_y;
 
-wire [7:0]  mem_di;
-wire [7:0]  rom_do;
-wire [7:0]  ram_do;
+wire  [7:0] mem_di;
+wire  [7:0] rom_do;
+wire  [7:0] ram_do;
 
-wire [7:0]  mem_do;
+wire  [7:0] mem_do;
 wire        mem_we;
 wire        mem_sync;
 wire        phi0;
+
+wire [15:0] tube_ram_addr;
+wire  [7:0] tube_ram_data_in;
+wire  [7:0] tube_ram_data_out;
+wire        tube_ram_wr;
 
 // core's raw audio 
 wire [15:0]	coreaud_l, coreaud_r;
 
 // user io
-wire [7:0] status;
-wire [1:0] buttons;
-wire [1:0] switches;
+wire [63:0] status;
+wire  [1:0] buttons;
+wire  [1:0] switches;
 
 wire        ps2_clk;
 wire        ps2_dat;
@@ -460,7 +473,6 @@ wire  [7:0] sd_din_fdc;
 wire img_ds = ioctl_index[7:6] == 1;
 
 bbc BBC(
-
 	.CLK48M_I   ( clk_48m       ),
 	.RESET_I    ( reset         ),
 
@@ -532,8 +544,20 @@ bbc BBC(
 	.cmos_addr      ( ioctl_addr[6:0]),
 	.cmos_we        ( ioctl_we & loader_active & ioctl_index == 8'hff ),
 	.cmos_di        ( ioctl_data     ),
-	.cmos_do        ( ioctl_din      )
+	.cmos_do        ( ioctl_din      ),
+
+	.tube_cfg       ( tube           ),
+	.tube_ram_addr  ( tube_ram_addr  ),
+	.tube_ram_data_in ( tube_ram_data_in ),
+	.tube_ram_data_out( tube_ram_data_out ),
+	.tube_ram_wr    ( tube_ram_wr    )
 );
+
+reg [7:0] tube_ram[65536];
+always @(posedge clk_48m) begin
+	if (tube_ram_wr) tube_ram[tube_ram_addr] <= tube_ram_data_in;
+	tube_ram_data_out <= tube_ram[tube_ram_addr];
+end
 
 assign SDRAM_CKE = 1'b1;
 wire sdram_ready;
