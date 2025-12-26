@@ -419,6 +419,7 @@ set_global_assignment -name VERILOG_MACRO "USE_CLOCK_50=1"
 set_global_assignment -name VERILOG_MACRO "BIG_OSD=1"
 set_global_assignment -name VERILOG_MACRO "USE_HDMI=1"
 set_global_assignment -name VERILOG_MACRO "SIDI128_EXPANSION=1"
+set_global_assignment -name VERILOG_MACRO "TUBE=1"
 
 set_global_assignment -name DSP_BLOCK_BALANCING "DSP BLOCKS"
 set_global_assignment -name AUTO_MERGE_PLLS OFF
@@ -433,6 +434,6 @@ set_global_assignment -name QIP_FILE "mist-modules/mist.qip"
 set_global_assignment -name VERILOG_FILE sdram.v
 set_global_assignment -name VERILOG_FILE clockgen.v
 
-set_global_assignment -name USE_SIGNALTAP_FILE output_files/serproc.stp
+set_global_assignment -name USE_SIGNALTAP_FILE output_files/cpu.stp
 set_global_assignment -name SIGNALTAP_FILE output_files/serproc.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
